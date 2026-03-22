@@ -26,8 +26,12 @@ Enable students to easily connect through enquiry forms
 
 
 🖼️ Campus gallery
+
+
 📩 Enquiry form with EmailJS integration
+
 📱 Fully responsive design
+
 # Tech Stack
 HTML5 – Semantic structure
 CSS3 – Grid, Flexbox, animations
