@@ -3,6 +3,13 @@
  */
 
 document.addEventListener('DOMContentLoaded', function() {
+    // Initialize EmailJS - Method 3 Protected (Safe for GitHub)
+    if (typeof emailjs !== 'undefined' && window.emailjsConfig) {
+        emailjs.init(window.emailjsConfig.publicKey);
+    } else {
+        console.log('EmailJS: Add your config.js for contact form to work');
+    }
+    
     initMobileMenu();
     initVideoSlideshow();
     initScrollAnimations();
@@ -77,53 +84,59 @@ function initScrollAnimations() {
  * Gallery Toggle - View More/Less
  */
 function initGalleryToggle() {
-    const moreImages = document.querySelectorAll('.more-images');
-    const btn = document.getElementById('viewMoreBtn');
-    
-    // Hide more images initially
-    moreImages.forEach(item => {
-        item.style.display = 'none';
-    });
-    
-    // Make first 3 images visible initially
     const galleryItems = document.querySelectorAll('.gallery-grid .gallery-item');
+    
+    // Collapse items beyond first 6 initially
     galleryItems.forEach((item, index) => {
-        if (index < 3) {
-            item.style.display = 'block';
+        if (index >= 6) {
+            item.classList.add('collapsed');
         }
     });
 }
 
 function toggleGallery() {
-    const moreImages = document.querySelectorAll('.more-images');
+    const galleryItems = document.querySelectorAll('.gallery-grid .gallery-item');
     const btn = document.getElementById('viewMoreBtn');
-    const isHidden = moreImages[0].style.display === 'none';
     
-    if (isHidden) {
-        // Show more images
-        moreImages.forEach(item => {
-            item.style.display = 'block';
-        });
-        btn.innerHTML = `
-            View Less Images
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M5 15l7-7 7 7" />
-            </svg>
-        `;
-    } else {
-        // Hide more images
-        const galleryItems = document.querySelectorAll('.gallery-grid .gallery-item');
+    // Check if any items beyond first 6 are visible (expanded state)
+    const isExpanded = Array.from(galleryItems).slice(6).some(item => !item.classList.contains('collapsed'));
+    
+    if (isExpanded) {
+        // Collapse to first 6
         galleryItems.forEach((item, index) => {
-            if (index >= 3) {
-                item.style.display = 'none';
+            if (index >= 6) {
+                item.classList.add('collapsed');
             }
         });
-        btn.innerHTML = `
-            View More Images
+        btn.innerHTML = `View More Images
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
-            </svg>
-        `;
+            </svg>`;
+    } else {
+        // Expand all
+        galleryItems.forEach(item => {
+            item.classList.remove('collapsed');
+        });
+        btn.innerHTML = `View Less Images
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M5 15l7-7 7 7" />
+            </svg>`;
+    }
+}
+
+function toggleAwards() {
+    const hiddenAward = document.querySelector('.hidden-award');
+    const btn = document.getElementById('viewMoreAwardsBtn');
+    const isHidden = hiddenAward.style.display === 'none' || hiddenAward.classList.contains('hidden-award');
+    
+    if (isHidden) {
+        hiddenAward.style.display = 'flex';
+        hiddenAward.classList.remove('hidden-award');
+        btn.innerHTML = 'View Less Awards <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 15l7-7 7 7" /></svg>';
+    } else {
+        hiddenAward.style.display = 'none';
+        hiddenAward.classList.add('hidden-award');
+        btn.innerHTML = 'View More Awards <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" /></svg>';
     }
 }
 
@@ -243,7 +256,7 @@ function initEnquiryFormValidation() {
     });
 
     // Form submission handler
-    form.addEventListener('submit', function(e) {
+    form.addEventListener('submit', async function(e) {
         e.preventDefault();
         
         // Validate all fields
@@ -254,23 +267,44 @@ function initEnquiryFormValidation() {
             }
         });
 
-        // If form is valid, show success message
-        if (isValid) {
+        if (!isValid) return;
+
+        // Send via EmailJS (Method 3 - External Config)
+        try {
+    const config = window.emailjsConfig || {
+                serviceID: 'YOUR_SERVICE_ID_HERE',
+                templateID: 'YOUR_TEMPLATE_ID_HERE'
+            };
+            console.log('EmailJS send called with config:', config);
+            if (config.serviceID === 'YOUR_SERVICE_ID_HERE') {
+                console.warn('EmailJS: Configure your keys in config.js');
+                return;
+            }
+            await emailjs.send(config.serviceID, config.templateID, {
+                fullName: fields.fullName.element.value,
+                email: fields.email.element.value,
+                phone: fields.phone.element.value,
+                courseInterest: fields.courseInterest.element.value,
+                queryType: document.getElementById('queryType').value,
+                message: fields.message.element.value
+            });
+            
+            // Success
             const formContainer = document.querySelector('.enquiry-form');
             const successMessage = document.getElementById('successMessage');
-            
             if (formContainer && successMessage) {
                 formContainer.style.display = 'none';
                 successMessage.style.display = 'block';
                 
-                // Reset form for new submission
+                // Reset form
                 form.reset();
-                
-                // Remove valid/invalid classes
                 Object.keys(fields).forEach(fieldName => {
                     fields[fieldName].element.classList.remove('valid', 'invalid');
                 });
             }
+        } catch (error) {
+            console.error('EmailJS error:', error);
+            alert('Failed to send enquiry. Please try again or contact us directly.');
         }
     });
 

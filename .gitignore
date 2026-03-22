@@ -1,0 +1,21 @@
+# EmailJS Secrets
+config.js
+emailjs-config.js
+
+# Docs
+EMAILJS_SETUP.md
+
+# Env
+.env
+secrets/
+
+# OS
+.DS_Store
+Thumbs.db
+.DS_Store?
+*.log
+
+# IDE
+.vscode/
+.idea/
+
