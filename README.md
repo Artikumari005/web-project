@@ -8,11 +8,11 @@ Create a professional online presence for a college
 Provide structured information about courses, departments, and faculty
 Enable students to easily connect through enquiry forms
 # Target Users
-Prospective students & parents
-Faculty and staff
-Alumni and community members
-Industry partners
-🚀 Features
+-Prospective students & parents
+-Faculty and staff
+-Alumni and community members
+-Industry partners
+# Features
 🎥 Hero section with video background
 📚 Programs & departments showcase
 🧑‍🏫 Faculty listing
